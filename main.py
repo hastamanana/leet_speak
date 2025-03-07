@@ -4,42 +4,49 @@ import string
 # Закомментируйте чтобы протестировать работу программы
 # import pyperclip
 
-def is_import_pyperclip() -> bool:
+def is_import_module() -> bool:
     """ Проверяет, ипортирован ли модуль pyperclip. """
     try:
-        __import__('pyperclip')
+        import pyperclip
         return True
     except ModuleNotFoundError:
-        print('Модуль `pyperclip` не установлен')
+        print(f'Модуль `pyperclip` не установлен')
         return False
             
 
-def eng_word_to_leetspeak() -> str:
-    eng_letters_n_digits = string.ascii_letters + string.digits + ' '
-    """ Преобразует английскую строку в сообщение и возвращает leetspeak. """
+def get_user_input() -> str:
+    """ Принимает ввод от пользователя. """
+    eng_letters_n_digits: str = string.ascii_letters + string.digits + ' '
     while True:
-        global msg 
-        msg = input('Введите ваше сообщение `leet`: ')
+        msg: str = input('Введите ваше сообщение `leet`: ')
         if not msg:
             print('Необходимо ввести сообщение!\n')
             continue
+
         elif any(i not in eng_letters_n_digits for i in msg):
             print('Необходимо ввести текст, состоящий только из английского алфавита и цифр.\n')
             continue
-        break
 
+        return msg
+    
+
+def get_probability() -> float:
     while True:
         try:
             probability_of_replacing_char_temp: int = int(input("Укажите вероятность замены символа (введите целое число от 1 до 10): "))
-        except BaseException:
+        except ValueError:
             print('Необходимо ввести число! Не строку.')
             continue
         else:
             if not (1 <= probability_of_replacing_char_temp <= 10):
+                print('Число должны быть в диапазоне от 1 до 10!')
                 continue
             probability_of_replacing_char: float = probability_of_replacing_char_temp / 10
-            print(probability_of_replacing_char)
-        break
+
+            return probability_of_replacing_char
+
+
+def msg_to_leet(msg, probability) -> str:
 
     char_mapping = {
         "a": ["4", "@", "/-\\"],
@@ -73,7 +80,7 @@ def eng_word_to_leetspeak() -> str:
     leetspeak = ""
     for char in msg: 
         # Вероятность того, что мы изменим символ на leetspeak, составляет 70%.
-        if char.lower() in char_mapping and random.random() <= probability_of_replacing_char:
+        if char.lower() in char_mapping and random.random() <= probability:
             possible_leet_char_replacement = char_mapping[char.lower()]
             leet_replacement = random.choice(possible_leet_char_replacement)
             leetspeak = leetspeak + leet_replacement
@@ -82,21 +89,22 @@ def eng_word_to_leetspeak() -> str:
             leetspeak = leetspeak + char
     return leetspeak
 
+
 def copy_to_clipboard(text) -> None: # None же возвращает?
     """ Копирует leet-строку в буфер обмена. """
-    if is_import_pyperclip:
+    if is_import_module():
         import pyperclip
         print()
+        pyperclip.copy(text)
         print("[INFO] Результат скопирован в буфер обмена.")
-        return pyperclip.copy(text)
     
 
-def save_leet_msg(text) -> None:
+def save_to_file(text) -> None:
     with open('results.txt', 'a') as f:
         f.write(f"{text}\n")
 
 
-def do_you_want_to_see_your_first_msg() -> None:
+def do_you_want_to_see_your_first_msg(msg) -> None:
     answers = ('да', 'нет')
     ans: str = input('Вы хотите увидеть текст до преобразования в leet - строку? (да / нет): ')
     while ans not in answers:
@@ -110,12 +118,16 @@ def do_you_want_to_see_your_first_msg() -> None:
 
 
 def main() -> None:
-    if is_import_pyperclip():
-        leetspeak = eng_word_to_leetspeak()
-        print(leetspeak)
-        save_leet_msg(leetspeak)
-        copy_to_clipboard(leetspeak)
-        do_you_want_to_see_your_first_msg()
+    text = get_user_input()
+    probability = get_probability()
+    res = msg_to_leet(text, probability)
+    print(res)
+    save_to_file(res)
+    
+    if is_import_module():
+        copy_to_clipboard(res)
+
+    do_you_want_to_see_your_first_msg(text)
 
 if __name__ == "__main__":
     main()
