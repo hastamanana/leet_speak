@@ -1,6 +1,9 @@
 import random
 import string
 
+MIN_NUM_PROBABILITY = 1
+MAX_NUM_PROBABILITY = 100
+
 
 def is_import_module() -> bool:
     """ Проверяет, ипортирован ли модуль pyperclip. """
@@ -12,38 +15,61 @@ def is_import_module() -> bool:
     return True
 
 
-# TODO: Декомпозировать функцию
+def validate_user_input() -> str:
+    eng_letters_n_digits: str = string.ascii_letters + string.digits + ' '
+    msg: str = input('Введите ваше сообщение `leet`: ')
+
+    if not msg:
+        raise ValueError('Необходимо ввести сообщение!\n') 
+    elif any(i not in eng_letters_n_digits for i in msg):
+        raise ValueError('Необходимо ввести текст, состоящий только из английского алфавита и цифр.\n')
+
+    return msg
+
+
+# TODO: Декомпозировать функцию 
+
 def get_user_input() -> str:
     """ Принимает ввод от пользователя. """
-    eng_letters_n_digits: str = string.ascii_letters + string.digits + ' '
     while True:
-        msg: str = input('Введите ваше сообщение `leet`: ')
-
+        try:
+            msg: str = validate_user_input()
+        except ValueError as err:
+            print(err)
         # TODO: Написать валидатор(ы)
-        if not msg:
-            print('Необходимо ввести сообщение!\n')
-            continue
-        elif any(i not in eng_letters_n_digits for i in msg):
-            print('Необходимо ввести текст, состоящий только из английского алфавита и цифр.\n')
-            continue
+        # написал 
+        else:
+            return msg
 
-        return msg
+
+def validate_probability(num) -> int:
+    if not (MIN_NUM_PROBABILITY <= num <= MAX_NUM_PROBABILITY):
+        raise ValueError('Число должно быть в диапазоне от 1 до 100!')
+    
+    return num
+
+
+def get_user_probability() -> int:
+    try:
+        num = int(input('Укажите вероятность замены символа (введите целое число от 1 до 100): '))
+    except ValueError:
+        raise ValueError('Нужно ввести число! Не строку!')
+    return num
 
 
 def get_probability() -> float:
     while True:
         try:
-            probability_of_replacing_char_temp: int = int(
-                input("Укажите вероятность замены символа (введите целое число от 1 до 100): "))
-        except ValueError:
-            print('Необходимо ввести число! Не строку.')
-            continue
+            probability_of_replacing_char_temp: int = get_user_probability()
+            validate_probability(probability_of_replacing_char_temp)
+        except ValueError as err:
+            print(err)
         else:
             # TODO: Написать валидатор
+            # написал
+
             # TODO: Антипаттерн: Магические числа в коде
-            if not (1 <= probability_of_replacing_char_temp <= 100):
-                print('Число должны быть в диапазоне от 1 до 100!')
-                continue
+            # написал 2 константы
             probability_of_replacing_char: float = probability_of_replacing_char_temp / 100
 
             return probability_of_replacing_char
@@ -101,6 +127,8 @@ def copy_to_clipboard(text) -> None:
 
 
 # TODO: Можно добавить гибкости к функции.
+# напомните, что тут нужно добавить.
+
 def save_to_file(text, encoding='UTF-8') -> None:
     with open('results.txt', mode='a', encoding=encoding) as f:
         f.write(f"{text}\n")
