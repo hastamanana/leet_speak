@@ -3,160 +3,168 @@ import string
 
 MIN_NUM_PROBABILITY: int = 1
 MAX_NUM_PROBABILITY: int = 100
+CHAR_MAP: dict[str, list[str]] = {
+    "a": ["4", "@", "/-\\"],
+    "b": ["8", "|:"],
+    "c": ["(", "["],
+    "d": ["|)"],
+    "e": ["3"],
+    "f": ["ph"],
+    "g": ["9"],
+    "h": ["]-[", "|-|"],
+    "i": ["1", "!", "|"],
+    "j": ["_|"],
+    "k": ["]<"],
+    "l": ["|_"],
+    "m": ["^^", "|\\/|", "(V)", "/^^\\"],
+    "o": ["0"],
+    "p": ["|*"],
+    "q": ["()_", "0."],
+    "r": ["2", "Я"],
+    "s": ["$", "5"],
+    "t": ["7", "+"],
+    "u": ["|_|"],
+    "v": ["\\/"],
+    "w": ["\\/\\/", "\\X/", "vv"],
+    "x": ["><", "Ж", "}{"],
+    "y": ["7"],
+    "z": ["2"],
+}
 
 
 def is_import_module() -> bool:
-    """ Проверяет, ипортирован ли модуль pyperclip. """
+    """Проверяет, ипортирован ли модуль pyperclip."""
     try:
         import pyperclip
     except ModuleNotFoundError:
-        print(f'Модуль `pyperclip` не установлен')
+        print(
+            "Модуль `pyperclip` не установлен, "
+            "результат leetspeak невозможно скопировать "
+            "в буфер обмена"
+        )
         return False
     return True
 
 
-def validate_user_input(msg) -> str:
-    eng_letters_n_digits: str = string.ascii_letters + string.digits + ' '
+def validate_user_input(msg: str) -> str:
+    valid_chars: str = string.ascii_letters + string.digits + " "
 
     if not msg:
-        raise ValueError('Необходимо ввести сообщение!\n') 
-    elif any(i not in eng_letters_n_digits for i in msg):
-        raise ValueError('Необходимо ввести текст, состоящий только из английского алфавита и цифр.\n')
+        raise ValueError("Необходимо ввести сообщение!\n")
+    elif any(i not in valid_chars for i in msg):
+        raise ValueError(
+            "Необходимо ввести текст, состоящий "
+            "только из английского алфавита и цифр.\n"
+        )
 
     return msg
 
 
-# TODO: Декомпозировать функцию 
-
 def get_user_input() -> str:
-    """ Принимает ввод от пользователя. """
+    """Принимает ввод от пользователя."""
     while True:
         try:
-            msg: str = input('Введите ваше сообщение `leet`: ')
+            msg: str = input("Введите ваше сообщение `leet`: ")
             validate_user_input(msg)
         except ValueError as err:
             print(err)
-        # TODO: Написать валидатор(ы)
-        # написал 
         else:
             return msg
 
 
-def validate_probability(num) -> int:
+def validate_probability(num: int) -> int:
     if not (MIN_NUM_PROBABILITY <= num <= MAX_NUM_PROBABILITY):
-        raise ValueError(f'Число должно быть в диапазоне от {MIN_NUM_PROBABILITY} до {MAX_NUM_PROBABILITY}!')
-    
+        raise ValueError(
+            "Число должно быть в диапазоне "
+            f"от {MIN_NUM_PROBABILITY} "
+            f"до {MAX_NUM_PROBABILITY}!"
+        )
+
     return num
 
 
 def get_user_probability() -> int:
     try:
-        num = int(input('Укажите вероятность замены символа (введите целое число от 1 до 100): '))
+        num = int(
+            input(
+                "Укажите вероятность замены символа "
+                "(введите целое число "
+                f"от {MIN_NUM_PROBABILITY} "
+                f"до {MAX_NUM_PROBABILITY}): "
+            )
+        )
     except ValueError:
-        raise ValueError('Нужно ввести число! Не строку!')
+        raise ValueError("Нужно ввести целое число!")
+
     return num
 
 
 def get_probability() -> float:
     while True:
         try:
-            probability_of_replacing_char_temp: int = get_user_probability()
-            validate_probability(probability_of_replacing_char_temp)
+            probability_to_replace: int = get_user_probability()
+            validate_probability(probability_to_replace)
         except ValueError as err:
             print(err)
         else:
-            # TODO: Написать валидатор
-            # написал
-
-            # TODO: Антипаттерн: Магические числа в коде
-            # написал 2 константы
-
-            return probability_of_replacing_char_temp / 100
+            return probability_to_replace / 100
 
 
-def msg_to_leet(msg, probability) -> str:
-    char_mapping = {
-        "a": ["4", "@", "/-\\"],
-        "b": ["8", "|:"],
-        "c": ["(", "["],
-        "d": ["|)"],
-        "e": ["3"],
-        "f": ["ph"],
-        "g": ["9"],
-        "h": ["]-[", "|-|"],
-        "i": ["1", "!", "|"],
-        "j": ["_|"],
-        "k": ["]<"],
-        "l": ["|_"],
-        "m": ["^^", "|\\/|", "(V)", "/^^\\"],
-        "o": ["0"],
-        "p": ["|*"],
-        "q": ["()_", "0."],
-        "r": ["2", "Я"],
-        "s": ["$", "5"],
-        "t": ["7", "+"],
-        "u": ["|_|"],
-        "v": ["\\/"],
-        "w": ["\\/\\/", "\\X/", "vv"],
-        "x": ["><", "Ж", "}{"],
-        "y": ["7"],
-        "z": ["2"],
-
-    }
-
-    leetspeak = ""
-    for char in msg:
+def convert_to_leetspeak(msg: str, probability: float) -> str:
+    leetspeak: str = ""
+    for curr_char in msg:
         # Вероятность того, что мы изменим символ на leetspeak
-        if char.lower() in char_mapping and random.random() <= probability:
-            possible_leet_char_replacement = char_mapping[char.lower()]
-            leet_replacement = random.choice(possible_leet_char_replacement)
-            leetspeak = leetspeak + leet_replacement
-        else:  # Добавляется сам символ.
+        if curr_char.lower() in CHAR_MAP and random.random() <= probability:
+            leet_chars = CHAR_MAP[curr_char.lower()]
+            char = random.choice(leet_chars)
             leetspeak = leetspeak + char
+        else:  # Добавляется сам символ.
+            leetspeak = leetspeak + curr_char
 
     return leetspeak
 
 
-def copy_to_clipboard(text) -> None:
-    """ Копирует leet-строку в буфер обмена. """
-    import pyperclip
-    print()
-    pyperclip.copy(text)
-    print("[INFO] Результат скопирован в буфер обмена.")
+def copy_to_clipboard(text: str) -> None:
+    """
+    Копирует leet-строку в буфер обмена, если установлен модуль `pyperclip`.
+    """
+    if is_import_module():
+        import pyperclip
+        pyperclip.copy(text)
+        print("\n[INFO] Результат скопирован в буфер обмена.")
 
 
-# TODO: Можно добавить гибкости к функции.
-# напомните, что тут нужно добавить.
-
-def save_to_file(text, filename='results.txt', encoding='UTF-8') -> None:
-    with open(filename, mode='a', encoding=encoding) as f:
+def save_to_file(
+        text: str,
+        filename: str = "results.txt",
+        encoding: str = "UTF-8"
+) -> None:
+    with open(filename, mode="a", encoding=encoding) as f:
         f.write(f"{text}\n")
 
 
-def response_to_user_want_see_first(msg) -> None:
-    answers: tuple[str] = ('да', 'нет')
-    ans: str = input('Вы хотите увидеть текст до преобразования в leet - строку? (да / нет): ')
-    while ans not in answers:
-        ans = input(f"Возможные ответы: {answers}: ")
+def show_source_text(msg: str) -> None:
+    ans: str = input(
+        "Вы хотите увидеть текст до преобразования "
+        "в leet - строку? (да/нет): "
+    )
 
-    if ans == 'да':
+    if ans == "да":
         print(f"\nПервоначальный текст: {msg}")
-    elif ans == 'нет':
-        print('Ок. Счастливо.')
+    else:
+        print("Ок. Счастливо.")
 
 
 def main() -> None:
-    text = get_user_input()
-    probability = get_probability()
+    text: str = get_user_input()
+    probability: float = get_probability()
 
-    res = msg_to_leet(text, probability)
+    res: str = convert_to_leetspeak(text, probability)
     print(res)
+
     save_to_file(res)
-
-    if is_import_module():
-        copy_to_clipboard(res)
-
-    response_to_user_want_see_first(msg=text)
+    copy_to_clipboard(res)
+    show_source_text(msg=text)
 
 
 if __name__ == "__main__":
