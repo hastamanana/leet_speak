@@ -1,8 +1,8 @@
 import random
 import string
 
-MIN_NUM_PROBABILITY = 1
-MAX_NUM_PROBABILITY = 100
+MIN_NUM_PROBABILITY: int = 1
+MAX_NUM_PROBABILITY: int = 100
 
 
 def is_import_module() -> bool:
@@ -15,9 +15,8 @@ def is_import_module() -> bool:
     return True
 
 
-def validate_user_input() -> str:
+def validate_user_input(msg) -> str:
     eng_letters_n_digits: str = string.ascii_letters + string.digits + ' '
-    msg: str = input('Введите ваше сообщение `leet`: ')
 
     if not msg:
         raise ValueError('Необходимо ввести сообщение!\n') 
@@ -33,7 +32,8 @@ def get_user_input() -> str:
     """ Принимает ввод от пользователя. """
     while True:
         try:
-            msg: str = validate_user_input()
+            msg: str = input('Введите ваше сообщение `leet`: ')
+            validate_user_input(msg)
         except ValueError as err:
             print(err)
         # TODO: Написать валидатор(ы)
@@ -44,7 +44,7 @@ def get_user_input() -> str:
 
 def validate_probability(num) -> int:
     if not (MIN_NUM_PROBABILITY <= num <= MAX_NUM_PROBABILITY):
-        raise ValueError('Число должно быть в диапазоне от 1 до 100!')
+        raise ValueError(f'Число должно быть в диапазоне от {MIN_NUM_PROBABILITY} до {MAX_NUM_PROBABILITY}!')
     
     return num
 
@@ -70,9 +70,8 @@ def get_probability() -> float:
 
             # TODO: Антипаттерн: Магические числа в коде
             # написал 2 константы
-            probability_of_replacing_char: float = probability_of_replacing_char_temp / 100
 
-            return probability_of_replacing_char
+            return probability_of_replacing_char_temp / 100
 
 
 def msg_to_leet(msg, probability) -> str:
@@ -129,13 +128,13 @@ def copy_to_clipboard(text) -> None:
 # TODO: Можно добавить гибкости к функции.
 # напомните, что тут нужно добавить.
 
-def save_to_file(text, encoding='UTF-8') -> None:
-    with open('results.txt', mode='a', encoding=encoding) as f:
+def save_to_file(text, filename='results.txt', encoding='UTF-8') -> None:
+    with open(filename, mode='a', encoding=encoding) as f:
         f.write(f"{text}\n")
 
 
 def response_to_user_want_see_first(msg) -> None:
-    answers = ('да', 'нет')
+    answers: tuple[str] = ('да', 'нет')
     ans: str = input('Вы хотите увидеть текст до преобразования в leet - строку? (да / нет): ')
     while ans not in answers:
         ans = input(f"Возможные ответы: {answers}: ")
